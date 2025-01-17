@@ -5,6 +5,8 @@ author 'Cramtpé'
 description 'Khalifouille'
 version '1.0.0'
 
+dependency 'oxmysql'
+
 server_scripts {
     'server.lua'
 }
