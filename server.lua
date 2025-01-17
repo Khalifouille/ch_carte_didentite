@@ -8,41 +8,47 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
         return
     end
 
-    if #args < 4 then
-        TriggerClientEvent('esx:showNotification', source, 'Usage: /fairemacarte [Nom] [Prénom] [Âge] [Nationalité]')
-        return
-    end
+    -- Récupérer les informations directement depuis la base de données
+    local query = 'SELECT firstname, lastname FROM users WHERE identifier = @identifier'
+    exports.oxmysql:execute(query, { ['@identifier'] = xPlayer.identifier }, function(result)
+        if result and #result > 0 then
+            local firstname = result[1].firstname
+            local lastname = result[1].lastname
 
-    local lastname = args[1]
-    local firstname = args[2]
-    local age = tonumber(args[3])
-    local nationality = args[4] or 'Marocaine'
-
-    if not age or age <= 0 then
-        TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
-        return
-    end
-
-    local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
-    local query = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
-
-    exports.oxmysql:execute(query, {
-        xPlayer.identifier,
-        firstname,
-        lastname,
-        dob,
-        nationality
-    }, function(rowsChanged)
-        if type(rowsChanged) == "table" then
-            if rowsChanged.affectedRows and rowsChanged.affectedRows > 0 then
-                TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
-            else
-                TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
+            -- Vérifier les données
+            if not firstname or not lastname then
+                TriggerClientEvent('esx:showNotification', source, 'Erreur : Votre identité n\'est pas configurée correctement. Veuillez contacter un administrateur.')
+                return
             end
-        elseif type(rowsChanged) == "number" and rowsChanged > 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
+
+            -- Récupérer l'âge et la nationalité depuis les arguments
+            local age = tonumber(args[1]) -- Le joueur spécifie uniquement l'âge
+            local nationality = args[2] or 'Marocaine' -- Nationalité par défaut si non spécifiée
+
+            if not age or age <= 0 then
+                TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
+                return
+            end
+
+            -- Calculer la date de naissance
+            local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
+            local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
+
+            exports.oxmysql:insert(insertQuery, {
+                xPlayer.identifier,
+                firstname,
+                lastname,
+                dob,
+                nationality
+            }, function(insertId)
+                if insertId then
+                    TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
+                else
+                    TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
+                end
+            end)
         else
-            TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
+            TriggerClientEvent('esx:showNotification', source, 'Erreur : Impossible de trouver votre identité dans la base de données.')
         end
     end)
 end, false)
