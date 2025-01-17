@@ -46,3 +46,43 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
         end
     end)
 end, false) 
+
+RegisterCommand('verifiercarte', function(source, args, rawCommand)
+    local xPlayer = ESX.GetPlayerFromId(source)
+
+    if not xPlayer then
+        print("Le joueur n'est pas trouvé.")
+        return
+    end
+
+    if #args < 1 then
+        TriggerClientEvent('esx:showNotification', source, 'Usage: /verifiercarte [ID joueur]')
+        return
+    end
+
+    local targetId = tonumber(args[1])
+    if not targetId or targetId <= 0 then
+        TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un ID valide.')
+        return
+    end
+
+    local targetPlayer = ESX.GetPlayerFromId(targetId)
+    if not targetPlayer then
+        TriggerClientEvent('esx:showNotification', source, 'Le joueur avec cet ID n\'existe pas ou n\'est pas en ligne.')
+        return
+    end
+
+    local query = "SELECT firstname, lastname, dob, nationality FROM user_identity WHERE identifier = ?"
+    exports.oxmysql:execute(query, { targetPlayer.identifier }, function(result)
+        if result and #result > 0 then
+            local identity = result[1]
+            local message = string.format(
+                "Carte d'identité de %s %s\nDate de naissance : %s\nNationalité : %s",
+                identity.firstname, identity.lastname, identity.dob, identity.nationality
+            )
+            TriggerClientEvent('esx:showNotification', source, message)
+        else
+            TriggerClientEvent('esx:showNotification', source, 'Ce joueur n\'a pas de carte d\'identité enregistrée.')
+        end
+    end)
+end, false)
