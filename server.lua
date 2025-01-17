@@ -1,7 +1,4 @@
 ESX = exports['es_extended']:getSharedObject()
-local function generateIdentityNumber()
-    return math.random(100000, 999999)
-end
 
 RegisterCommand('fairemacarte', function(source, args, rawCommand)
     local xPlayer = ESX.GetPlayerFromId(source)
@@ -26,21 +23,26 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
         return
     end
 
-    local identityNumber = generateIdentityNumber()
     local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
     local query = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
 
     exports.oxmysql:execute(query, {
-        ['@identifier'] = xPlayer.identifier,
-        ['@firstname'] = firstname,
-        ['@lastname'] = lastname,
-        ['@dob'] = dob,
-        ['@nationality'] = nationality
+        xPlayer.identifier,
+        firstname,
+        lastname,
+        dob,
+        nationality
     }, function(rowsChanged)
-        if rowsChanged > 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès ! Numéro d\'identité: ' .. identityNumber)
+        if type(rowsChanged) == "table" then
+            if rowsChanged.affectedRows and rowsChanged.affectedRows > 0 then
+                TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
+            else
+                TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
+            end
+        elseif type(rowsChanged) == "number" and rowsChanged > 0 then
+            TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
         else
             TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
         end
     end)
-end, false)
+end, false) 
