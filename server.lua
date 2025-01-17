@@ -177,3 +177,25 @@ RegisterCommand('fakeID', function(source, args, rawCommand)
     end)
 end, false)
 
+RegisterCommand('mescartes', function(source, args, rawCommand)
+    local xPlayer = ESX.GetPlayerFromId(source)
+
+    if not xPlayer then
+        print("Le joueur n'est pas trouvé.")
+        return
+    end
+
+    local query = "SELECT firstname, lastname, dob, nationality FROM user_identity WHERE identifier = ?"
+    exports.oxmysql:execute(query, { xPlayer.identifier }, function(result)
+        if result and #result > 0 then
+            local message = "Vos cartes d'identité :\n"
+            for _, identity in ipairs(result) do
+                message = message .. string.format("Nom: %s, Prénom: %s, Date de naissance: %s, Nationalité: %s\n",
+                    identity.lastname, identity.firstname, identity.dob, identity.nationality)
+            end
+            TriggerClientEvent('esx:showNotification', source, message)
+        else
+            TriggerClientEvent('esx:showNotification', source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
+        end
+    end)
+end, false)
