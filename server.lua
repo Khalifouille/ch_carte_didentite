@@ -95,7 +95,6 @@ RegisterCommand('modifinfos', function(source, args, rawCommand)
         return
     end
 
-    -- Vérification des arguments
     if #args < 4 then
         TriggerClientEvent('esx:showNotification', source, 'Usage: /modifinfos [Nom] [Prénom] [Âge] [Nationalité]')
         return
@@ -113,7 +112,6 @@ RegisterCommand('modifinfos', function(source, args, rawCommand)
 
     local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
 
-    -- Mise à jour dans la base de données
     local query = "UPDATE user_identity SET firstname = ?, lastname = ?, dob = ?, nationality = ? WHERE identifier = ?"
     exports.oxmysql:execute(query, {
         firstname,
@@ -122,7 +120,6 @@ RegisterCommand('modifinfos', function(source, args, rawCommand)
         nationality,
         xPlayer.identifier
     }, function(rowsChanged)
-        -- Vérification du type de retour
         if type(rowsChanged) == "table" and rowsChanged.affectedRows and rowsChanged.affectedRows > 0 then
             TriggerClientEvent('esx:showNotification', source, 'Vos informations ont été mises à jour avec succès.')
         elseif type(rowsChanged) == "number" and rowsChanged > 0 then
