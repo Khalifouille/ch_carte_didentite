@@ -199,3 +199,34 @@ RegisterCommand('mescartes', function(source, args, rawCommand)
         end
     end)
 end, false)
+
+exports('portefeuille', function(event, item, inventory, slot, data)
+    if event == 'usingItem' then
+        local xPlayer = ESX.GetPlayerFromId(inventory.id)
+
+        if not xPlayer then
+            print("Le joueur n'est pas trouvé.")
+            return false
+        end
+
+        local query = "SELECT firstname, lastname, dob, nationality FROM user_identity WHERE identifier = ?"
+        exports.oxmysql:execute(query, { xPlayer.identifier }, function(result)
+            if result and #result > 0 then
+                local message = "Vos cartes d'identité :\n"
+                for _, identity in ipairs(result) do
+                    message = message .. string.format("Nom: %s, Prénom: %s, Date de naissance: %s, Nationalité: %s\n",
+                        identity.lastname, identity.firstname, identity.dob, identity.nationality)
+                end
+                TriggerClientEvent('esx:showNotification', xPlayer.source, message)
+            else
+                TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
+            end
+        end)
+
+        return false
+    end
+
+    if event == 'usedItem' then
+        TriggerClientEvent('esx:showNotification', inventory.id, {description = 'Vous avez utilisé le portefeuille.'})
+    end
+end)
