@@ -83,50 +83,7 @@ RegisterCommand('verifiercarte', function(source, args, rawCommand)
     end)
 end, false)
 
-RegisterCommand('modifinfos', function(source, args, rawCommand)
-    local xPlayer = ESX.GetPlayerFromId(source)
-
-    if not xPlayer then
-        print("Le joueur n'est pas trouvé.")
-        return
-    end
-
-    if #args < 4 then
-        TriggerClientEvent('esx:showNotification', source, 'Usage: /modifinfos [Nom] [Prénom] [Âge] [Nationalité]')
-        return
-    end
-
-    local lastname = args[1]
-    local firstname = args[2]
-    local age = tonumber(args[3])
-    local nationality = args[4]
-
-    if not age or age <= 0 then
-        TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
-        return
-    end
-
-    local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
-
-    local query = "UPDATE user_identity SET firstname = ?, lastname = ?, dob = ?, nationality = ? WHERE identifier = ?"
-    exports.oxmysql:execute(query, {
-        firstname,
-        lastname,
-        dob,
-        nationality,
-        xPlayer.identifier
-    }, function(rowsChanged)
-        if type(rowsChanged) == "table" and rowsChanged.affectedRows and rowsChanged.affectedRows > 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Vos informations ont été mises à jour avec succès.')
-        elseif type(rowsChanged) == "number" and rowsChanged > 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Vos informations ont été mises à jour avec succès.')
-        else
-            TriggerClientEvent('esx:showNotification', source, 'Erreur : Impossible de mettre à jour vos informations.')
-        end
-    end)
-end, false)
-
-RegisterCommand('fakeID', function(source, args, rawCommand)
+RegisterCommand('fakeid', function(source, args, rawCommand)
     local xPlayer = ESX.GetPlayerFromId(source)
 
     if not xPlayer then
