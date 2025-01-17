@@ -134,46 +134,43 @@ RegisterCommand('fakeID', function(source, args, rawCommand)
         return
     end
 
-    local playerPed = GetPlayerPed(source)
-    local playerCoords = GetEntityCoords(playerPed)
-    local allowedCoords = vector3(-15.019775, -1310.373657, 29.263062)
-    local distance = #(playerCoords - allowedCoords)
-
-    if distance > 5.0 then
-        TriggerClientEvent('esx:showNotification', source, 'Vous devez être au bon endroit pour créer une fausse carte d\'identité.')
-        return
-    end
-
-    if #args < 4 then
-        TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
-        return
-    end
-
-    local lastname = args[1]
-    local firstname = args[2]
-    local age = tonumber(args[3])
-    local nationality = args[4] or 'Marocaine'
-
-    if not age or age <= 0 then
-        TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
-        return
-    end
-
-    local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
-    local query = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, TRUE)"
-
-    exports.oxmysql:insert(query, {
-        xPlayer.identifier,
-        firstname,
-        lastname,
-        dob,
-        nationality
-    }, function(insertId)
-        if insertId then
-            TriggerClientEvent('esx:showNotification', source, 'Votre fausse carte d\'identité a été créée avec succès !')
-        else
-            TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la fausse carte d\'identité.')
+    local query = "SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = TRUE"
+    exports.oxmysql:execute(query, { xPlayer.identifier }, function(result)
+        if result and result[1].count >= 2 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous possédez déjà deux fausses cartes d\'identité.')
+            return
         end
+
+        if #args < 4 then
+            TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
+            return
+        end
+
+        local lastname = args[1]
+        local firstname = args[2]
+        local age = tonumber(args[3])
+        local nationality = args[4] or 'Marocaine'
+
+        if not age or age <= 0 then
+            TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
+            return
+        end
+
+        local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
+        local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, TRUE)"
+        exports.oxmysql:insert(insertQuery, {
+            xPlayer.identifier,
+            firstname,
+            lastname,
+            dob,
+            nationality
+        }, function(insertId)
+            if insertId then
+                TriggerClientEvent('esx:showNotification', source, 'Votre fausse carte d\'identité a été créée avec succès !')
+            else
+                TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la fausse carte d\'identité.')
+            end
+        end)
     end)
 end, false)
 
