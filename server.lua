@@ -248,19 +248,12 @@ exports('cartedidentite', function(event, item, inventory, slot, data)
                     "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
                     result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
                 )
-                TriggerClientEvent('esx:showNotification', xPlayer.source, message)
+                TriggerClientEvent('ch_carte_didentite:showIdentity', xPlayer .source, message)
             else
                 TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
             end
         end)
     end
-
-    if event == 'usedItem' then
-        local itemLabel = ESX.GetItemLabel(item.name)
-        TriggerClientEvent('esx:showNotification', inventory.id, {description = 'Vous avez utilisé ' .. itemLabel .. '.'})
-    end
-
-    return false
 end)
 
 exports('cartedidentite2', function(event, item, inventory, slot, data)
