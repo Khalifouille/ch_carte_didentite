@@ -126,16 +126,16 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
         return
     end
 
+    exports.oxmysql:execute('SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = TRUE', {xPlayer.identifier}, function(result)
+    if result[1].count > 0 then
+        TriggerClientEvent('esx:showNotification', source, 'Vous avez déjà une fausse carte d\'identité.')
+        return
+    end
+
     if #args < 4 then
         TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
         return
     end
-
-    exports.oxmysql:execute('SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = TRUE', {xPlayer.identifier}, function(result)
-        if result[1].count > 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Vous avez déjà une fausse carte d\'identité.')
-            return
-        end
 
         local inkCount = xPlayer.getInventoryItem('cartouche_encre').count
         local paperCount = xPlayer.getInventoryItem('papier').count
