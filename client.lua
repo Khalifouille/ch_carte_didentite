@@ -6,14 +6,18 @@ CreateThread(function()
     while true do
         Wait(0)
 
-        DrawMarker(23, fakeIDMarkerPosition.x, fakeIDMarkerPosition.y, fakeIDMarkerPosition.z - 1.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 255, 255, 255, 100,false,true,2, nil, nil, false)
+        DrawMarker(23, fakeIDMarkerPosition.x, fakeIDMarkerPosition.y, fakeIDMarkerPosition.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 255, 255, 255, 100, false, true, 2, nil, nil, false)
 
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
         local distance = #(playerCoords - fakeIDMarkerPosition)
 
         if distance < 1.0 then
-            ESX.ShowHelpNotification("Hmmm, je pourrais peut-être créer une fausse carte d'identité ici...")
+            if ESX.GetPlayerData().job.name == 'police' then
+                ESX.ShowHelpNotification("Monsieur l'agent? Je chill juste ne bas du bâtiment.")
+            else
+                ESX.ShowHelpNotification("Hmmm, je pourrais peut-être créer une fausse carte d'identité ici...")
+            end
         end
     end
 end)
