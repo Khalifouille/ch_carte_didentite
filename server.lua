@@ -1,8 +1,6 @@
 ESX = exports['es_extended']:getSharedObject()
 
 ---------------------------------------------------------------------------------------- UTILITAIRES
-
--- Fonction utilitaire pour récupérer les informations d'identité
 local function getIdentity(identifier, fake_id, callback)
     local query = 'SELECT firstname, lastname, dob, nationality, fake_id FROM user_identity WHERE identifier = @identifier'
     if fake_id ~= nil then
