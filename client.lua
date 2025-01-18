@@ -29,3 +29,15 @@ AddEventHandler('ch_carte_didentite:showIdentity', function(info)
         info = info
     })
 end)
+
+RegisterNUICallback('showCursor', function(data, cb)
+    SetNuiFocus(true, true)
+    SetMouseCursorVisible(true)
+    cb('ok')
+end)
+
+RegisterNUICallback('hideCursor', function(data, cb)
+    SetNuiFocus(false, false)
+    SetMouseCursorVisible(false)
+    cb('ok')
+end)
