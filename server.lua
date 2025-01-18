@@ -1,6 +1,7 @@
 ESX = exports['es_extended']:getSharedObject()
 
 ---------------------------------------------------------------------------------------- UTILITAIRES
+
 local function getIdentity(identifier, fake_id, callback)
     local query = 'SELECT firstname, lastname, dob, nationality, fake_id FROM user_identity WHERE identifier = @identifier'
     if fake_id ~= nil then
@@ -125,11 +126,46 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
         return
     end
 
+    if #args < 4 then
+        TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
+        return
+    end
+
     exports.oxmysql:execute('SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = TRUE', {xPlayer.identifier}, function(result)
         if result[1].count > 0 then
             TriggerClientEvent('esx:showNotification', source, 'Vous avez déjà une fausse carte d\'identité.')
             return
         end
+
+        local inkCount = xPlayer.getInventoryItem('cartouche_encre').count
+        local paperCount = xPlayer.getInventoryItem('papier').count
+        local watermarkCount = xPlayer.getInventoryItem('filigranne').count
+        local money = xPlayer.getMoney()
+    
+        if inkCount < 5 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous avez besoin de 5 cartouches d\'encre.')
+            return
+        end
+    
+        if paperCount < 2 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous avez besoin de 2 papiers.')
+            return
+        end
+    
+        if watermarkCount < 2 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous avez besoin de 2 filigranes.')
+            return
+        end
+    
+        if money < 5000 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous avez besoin de 5000$.')
+            return
+        end
+    
+        xPlayer.removeInventoryItem('cartouche_encre', 5)
+        xPlayer.removeInventoryItem('papier', 2)
+        xPlayer.removeInventoryItem('filigranne', 2)
+        xPlayer.removeMoney(5000)
 
         local firstname = args[1]
         local lastname = args[2]
