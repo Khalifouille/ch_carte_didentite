@@ -14,7 +14,7 @@ CreateThread(function()
 
         if distance < 1.0 then
             if ESX.GetPlayerData().job.name == 'police' then
-                ESX.ShowHelpNotification("Monsieur l'agent? Je chill juste ne bas du bâtiment.")
+                ESX.ShowHelpNotification("Monsieur l'agent? Je chill juste en bas du bâtiment.")
             else
                 ESX.ShowHelpNotification("Hmmm, je pourrais peut-être créer une fausse carte d'identité ici...")
             end
