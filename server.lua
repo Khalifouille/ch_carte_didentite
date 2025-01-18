@@ -31,7 +31,7 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
                 local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
                 local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
 
-                exports.oxmysql:insert(insertQuery, {
+                local insertId = exports.oxmysql:insert(insertQuery, {
                     xPlayer.identifier,
                     firstname,
                     lastname,
@@ -39,6 +39,7 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
                     nationality
                 }, function(insertId)
                     if insertId then
+                        xPlayer.addInventoryItem('carte_identite', 1)
                         TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
                     else
                         TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
@@ -160,6 +161,7 @@ exports('portefeuille', function(event, item, inventory, slot, data)
                 TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
             end
         end)
+
 
         return false
     end
