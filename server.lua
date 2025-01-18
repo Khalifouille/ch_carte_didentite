@@ -97,17 +97,23 @@ RegisterCommand('verifiercarte', function(source, args, rawCommand)
         return
     end
 
-    local query = "SELECT firstname, lastname, dob, nationality FROM user_identity WHERE identifier = ?"
-    exports.oxmysql:execute(query, { targetPlayer.identifier }, function(result)
+    local query = "SELECT firstname, lastname, dob, nationality, fake_id FROM user_identity WHERE identifier = ?"
+    exports.oxmysql:execute(query, {targetPlayer.identifier}, function(result)
         if result and #result > 0 then
-            local identity = result[1]
+            local isFake = result[1].fake_id
             local message = string.format(
-                "Carte d'identité de %s %s\nDate de naissance : %s\nNationalité : %s",
-                identity.firstname, identity.lastname, identity.dob, identity.nationality
+                "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
+                result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
             )
-            TriggerClientEvent('esx:showNotification', source, message)
+
+            local random = math.random(100)
+            if isFake and random <= 20 then
+                TriggerClientEvent('esx:showNotification', source, 'Carte d\'identité fausse !')
+            else
+                TriggerClientEvent('esx:showNotification', source, message)
+            end
         else
-            TriggerClientEvent('esx:showNotification', source, 'Ce joueur n\'a pas de carte d\'identité enregistrée.')
+            TriggerClientEvent('esx:showNotification', source, 'Le joueur n\'a pas de carte d\'identité.')
         end
     end)
 end, false)
