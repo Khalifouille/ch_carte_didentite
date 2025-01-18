@@ -39,15 +39,26 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
                     nationality
                 }, function(insertId)
                     if insertId then
-                        xPlayer.addInventoryItem('carte_identite', 1)
+                        local item = {
+                            name = 'carte_identite',
+                            label = 'Carte d\'identité',
+                            weight = 0,
+                            stack = false,
+                            metadata = {
+                                firstname = firstname,
+                                lastname = lastname,
+                                dob = dob,
+                                nationality = nationality
+                            }
+                        }
+                        xPlayer.addInventoryItem(item.name, 1, item.metadata)
+
                         TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
                     else
                         TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
                     end
                 end)
             end)
-        else
-            TriggerClientEvent('esx:showNotification', source, 'Erreur : Impossible de trouver votre identité dans la base de données.')
         end
     end)
 end, false)
@@ -100,20 +111,20 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
         return
     end
 
+    if #args < 4 then
+        TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
+        return
+    end
+
     local query = "SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = TRUE"
-    exports.oxmysql:execute(query, { xPlayer.identifier }, function(result)
-        if result and result[1].count >= 2 then
-            TriggerClientEvent('esx:showNotification', source, 'Vous possédez déjà deux fausses cartes d\'identité.')
+    exports.oxmysql:execute(query, {xPlayer.identifier}, function(result)
+        if result[1].count > 0 then
+            TriggerClientEvent('esx:showNotification', source, 'Vous avez déjà une fausse carte d\'identité.')
             return
         end
 
-        if #args < 4 then
-            TriggerClientEvent('esx:showNotification', source, 'Usage: /fakeID [Nom] [Prénom] [Âge] [Nationalité]')
-            return
-        end
-
-        local lastname = args[1]
-        local firstname = args[2]
+        local firstname = args[1]
+        local lastname = args[2]
         local age = tonumber(args[3])
         local nationality = args[4] or 'Marocaine'
 
@@ -123,8 +134,9 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
         end
 
         local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
-        local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, TRUE)"
-        exports.oxmysql:insert(insertQuery, {
+        local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, fake_id) VALUES (?, ?, ?, ?, ?, TRUE)"
+
+        local insertId = exports.oxmysql:insert(insertQuery, {
             xPlayer.identifier,
             firstname,
             lastname,
@@ -132,6 +144,20 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
             nationality
         }, function(insertId)
             if insertId then
+                local item = {
+                    name = 'carte_identite_fake',
+                    label = 'Fausse carte d\'identité',
+                    weight = 0,
+                    stack = false,
+                    metadata = {
+                        firstname = firstname,
+                        lastname = lastname,
+                        dob = dob,
+                        nationality = nationality
+                    }
+                }
+                xPlayer.addInventoryItem(item.name, 1, item.metadata)
+
                 TriggerClientEvent('esx:showNotification', source, 'Votre fausse carte d\'identité a été créée avec succès !')
             else
                 TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la fausse carte d\'identité.')
@@ -171,3 +197,64 @@ exports('portefeuille', function(event, item, inventory, slot, data)
     end
 end)
 
+exports('cartedidentite', function(event, item, inventory, slot, data)
+    if event == 'usingItem' then
+        local xPlayer = ESX.GetPlayerFromId(inventory.id)
+
+        if not xPlayer then
+            print("Le joueur n'est pas trouvé.")
+            return false
+        end
+
+        local query = 'SELECT firstname, lastname, dob, nationality FROM user_identity WHERE identifier = @identifier AND fake_id = FALSE'
+        exports.oxmysql:execute(query, { ['@identifier'] = xPlayer.identifier }, function(result)
+            if result and #result > 0 then
+                local message = string.format(
+                    "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
+                    result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
+                )
+                TriggerClientEvent('esx:showNotification', xPlayer.source, message)
+            else
+                TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
+            end
+        end)
+    end
+
+    if event == 'usedItem' then
+        local itemLabel = ESX.GetItemLabel(item.name)
+        TriggerClientEvent('esx:showNotification', inventory.id, {description = 'Vous avez utilisé ' .. itemLabel .. '.'})
+    end
+
+    return false
+end)
+
+exports('cartedidentite2', function(event, item, inventory, slot, data)
+    if event == 'usingItem' then
+        local xPlayer = ESX.GetPlayerFromId(inventory.id)
+
+        if not xPlayer then
+            print("Le joueur n'est pas trouvé.")
+            return false
+        end
+
+        local query = 'SELECT firstname, lastname, dob, nationality, fake_id FROM user_identity WHERE identifier = @identifier AND fake_id = TRUE'
+        exports.oxmysql:execute(query, { ['@identifier'] = xPlayer.identifier }, function(result)
+            if result and #result > 0 then
+                local message = string.format(
+                    "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
+                    result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
+                )
+                TriggerClientEvent('esx:showNotification', xPlayer.source, message)
+            else
+                TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de carte d\'identité fausse.')
+            end
+        end)
+    end
+
+    if event == 'usedItem' then
+        local itemLabel = ESX.GetItemLabel(item.name)
+        TriggerClientEvent('esx:showNotification', inventory.id, {description = 'Vous avez utilisé ' .. itemLabel .. '.'})
+    end
+
+    return false
+end)
