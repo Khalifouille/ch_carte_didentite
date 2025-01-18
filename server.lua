@@ -8,38 +8,46 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
         return
     end
 
-    local query = "SELECT COUNT(*) as count FROM user_identity WHERE identifier = ? AND fake_id = FALSE"
-    exports.oxmysql:execute(query, { xPlayer.identifier }, function(result)
-        if result and result[1].count >= 1 then
-            TriggerClientEvent('esx:showNotification', source, 'Vous possédez déjà une carte d\'identité.')
-            return
+    local query = 'SELECT firstname, lastname FROM users WHERE identifier = @identifier'
+    exports.oxmysql:execute(query, { ['@identifier'] = xPlayer.identifier }, function(result)
+        if result and #result > 0 then
+            local firstname = result[1].firstname
+            local lastname = result[1].lastname
+            local checkQuery = 'SELECT * FROM user_identity WHERE identifier = @identifier AND fake_id = FALSE'
+            exports.oxmysql:execute(checkQuery, { ['@identifier'] = xPlayer.identifier }, function(existingIdentity)
+                if existingIdentity and #existingIdentity > 0 then
+                    TriggerClientEvent('esx:showNotification', source, 'Vous avez déjà une carte d\'identité.')
+                    return
+                end
+
+                local age = tonumber(args[1])
+                local nationality = args[2] or 'Marocaine'
+
+                if not age or age <= 0 then
+                    TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
+                    return
+                end
+
+                local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
+                local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
+
+                exports.oxmysql:insert(insertQuery, {
+                    xPlayer.identifier,
+                    firstname,
+                    lastname,
+                    dob,
+                    nationality
+                }, function(insertId)
+                    if insertId then
+                        TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
+                    else
+                        TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
+                    end
+                end)
+            end)
+        else
+            TriggerClientEvent('esx:showNotification', source, 'Erreur : Impossible de trouver votre identité dans la base de données.')
         end
-
-        local firstname = xPlayer.get('firstname')
-        local lastname = xPlayer.get('lastname')
-        local age = tonumber(args[1]) or 25
-        local nationality = args[2] or 'Marocaine'
-
-        if not age or age <= 0 then
-            TriggerClientEvent('esx:showNotification', source, 'Veuillez entrer un âge valide.')
-            return
-        end
-
-        local dob = os.date('%Y-%m-%d', os.time() - (age * 365 * 24 * 60 * 60))
-        local insertQuery = "INSERT INTO user_identity (identifier, firstname, lastname, dob, nationality, photo, fake_id) VALUES (?, ?, ?, ?, ?, NULL, FALSE)"
-        exports.oxmysql:insert(insertQuery, {
-            xPlayer.identifier,
-            firstname,
-            lastname,
-            dob,
-            nationality
-        }, function(insertId)
-            if insertId then
-                TriggerClientEvent('esx:showNotification', source, 'Votre carte d\'identité a été créée avec succès !')
-            else
-                TriggerClientEvent('esx:showNotification', source, 'Erreur lors de la création de la carte d\'identité.')
-            end
-        end)
     end)
 end, false)
 
