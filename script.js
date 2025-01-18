@@ -5,9 +5,11 @@ window.addEventListener('message', function(event) {
     }
 });
 
-document.getElementById("closeButton").addEventListener("click", function() {
-    document.getElementById("identityCard").style.display = "none";
-    fetch(`https://${GetParentResourceName()}/close`, {
-        method: 'POST'
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("closeButton").addEventListener("click", function() {
+        document.getElementById("identityCard").style.display = "none";
+        fetch(`https://${GetParentResourceName()}/close`, {
+            method: 'POST'
+        });
     });
 });
