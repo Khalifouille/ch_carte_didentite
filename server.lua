@@ -1,5 +1,7 @@
 ESX = exports['es_extended']:getSharedObject()
 
+---------------------------------------------------------------------------------------- FAIRE CARTE
+
 RegisterCommand('fairemacarte', function(source, args, rawCommand)
     local xPlayer = ESX.GetPlayerFromId(source)
 
@@ -63,6 +65,8 @@ RegisterCommand('fairemacarte', function(source, args, rawCommand)
     end)
 end, false)
 
+---------------------------------------------------------------------------------------- VERIFIER CARTE
+
 RegisterCommand('verifiercarte', function(source, args, rawCommand)
     local xPlayer = ESX.GetPlayerFromId(source)
 
@@ -102,6 +106,8 @@ RegisterCommand('verifiercarte', function(source, args, rawCommand)
         end
     end)
 end, false)
+
+---------------------------------------------------------------------------------------- FAKE ID
 
 RegisterCommand('fakeid', function(source, args, rawCommand)
     local xPlayer = ESX.GetPlayerFromId(source)
@@ -166,6 +172,8 @@ RegisterCommand('fakeid', function(source, args, rawCommand)
     end)
 end, false)
 
+---------------------------------------------------------------------------------------- METADATA POUR LE PORTEFEUILLE
+
 exports('portefeuille', function(event, item, inventory, slot, data)
     if event == 'usingItem' then
         local xPlayer = ESX.GetPlayerFromId(inventory.id)
@@ -197,6 +205,8 @@ exports('portefeuille', function(event, item, inventory, slot, data)
     end
 end)
 
+---------------------------------------------------------------------------------------- METADATA POUR LE VRAI ID
+
 exports('cartedidentite', function(event, item, inventory, slot, data)
     if event == 'usingItem' then
         local xPlayer = ESX.GetPlayerFromId(inventory.id)
@@ -227,6 +237,8 @@ exports('cartedidentite', function(event, item, inventory, slot, data)
 
     return false
 end)
+
+---------------------------------------------------------------------------------------- METADATA POUR LE FAKE ID
 
 exports('cartedidentite2', function(event, item, inventory, slot, data)
     if event == 'usingItem' then
