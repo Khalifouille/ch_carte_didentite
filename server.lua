@@ -75,6 +75,11 @@ RegisterCommand('verifiercarte', function(source, args, rawCommand)
         return
     end
 
+    if xPlayer.job.name ~= 'police' then
+        TriggerClientEvent('esx:showNotification', source, 'Tu es pas condé !')
+        return
+    end
+
     if #args < 1 then
         TriggerClientEvent('esx:showNotification', source, 'Usage: /verifiercarte [ID joueur]')
         return
