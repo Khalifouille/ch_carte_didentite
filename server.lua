@@ -244,11 +244,15 @@ exports('cartedidentite', function(event, item, inventory, slot, data)
 
         getIdentity(xPlayer.identifier, false, function(result)
             if result and #result > 0 then
-                local message = string.format(
-                    "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
-                    result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
-                )
-                TriggerClientEvent('ch_carte_didentite:showIdentity', xPlayer .source, message)
+                local message = {
+                    type = "showIdentity",
+                    name = result[1].lastname,
+                    surname = result[1].firstname,
+                    dob = result[1].dob,
+                    nationality = result[1].nationality
+                }
+                print('Données envoyées:', json.encode(message))
+                TriggerClientEvent('ch_carte_didentite:showIdentity', xPlayer.source, message)
             else
                 TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de cartes d\'identité enregistrées.')
             end
@@ -267,10 +271,13 @@ exports('cartedidentite2', function(event, item, inventory, slot, data)
 
         getIdentity(xPlayer.identifier, true, function(result)
             if result and #result > 0 then
-                local message = string.format(
-                    "Nom: %s\nPrénom: %s\nDate de naissance: %s\nNationalité: %s",
-                    result[1].lastname, result[1].firstname, result[1].dob, result[1].nationality
-                )
+                local message = {
+                    type = "showIdentity",
+                    name = result[1].lastname,
+                    surname = result[1].firstname,
+                    dob = result[1].dob,
+                    nationality = result[1].nationality
+                }
                 TriggerClientEvent('ch_carte_didentite:showIdentity', xPlayer.source, message)
             else
                 TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous n\'avez pas de carte d\'identité fausse.')

@@ -20,5 +20,6 @@ ui_page 'index.html'
 files {
     'index.html',
     'style.css',
-    'script.js'
+    'script.js',
+    'image2.jpg'
 }

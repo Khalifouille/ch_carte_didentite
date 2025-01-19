@@ -5,11 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Carte d'identité</title>
+    <style>
+        .card {
+            position: relative;
+            width: 600px; 
+        }
+        .card img {
+            width: 100%;    
+        }
+        .identity-info {
+            position: absolute;
+            color: black; 
+            font-size: 16px; 
+        }
+        .name {
+            top: 130px;
+            left: 210px;
+        }
+        .surname {
+            top: 200px;
+            left: 280px;
+        }
+        .dob {
+            top: 250px;
+            left: 240px;
+        }
+        .nationality {
+            top: 330px; 
+            left: 390px;
+        }
+    </style>
 </head>
 <body>
     <div id="identityCard" class="card" style="display: none;">
-        <h1>Carte d'identité</h1>
-        <div id="identityInfo"></div>
+        <img id="identityImage" src="image2.jpg" alt="Image">
+        <div id="name" class="identity-info name"></div>
+        <div id="surname" class="identity-info surname"></div>
+        <div id="dob" class="identity-info dob"></div>
+        <div id="nationality" class="identity-info nationality"></div>
         <button id="closeButton">Fermer</button>
     </div>
     <script src="script.js"></script>
