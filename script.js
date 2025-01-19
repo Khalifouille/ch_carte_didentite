@@ -26,4 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            document.getElementById("identityCard").style.display = "none";
+            $.post('https://ch_carte_didentite/hideCursor', JSON.stringify({}));
+            fetch(`https://${GetParentResourceName()}/close`, {
+                method: 'POST'
+            });
+        }
+    });
 });
