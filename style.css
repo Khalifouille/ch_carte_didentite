@@ -8,3 +8,43 @@ body {
     height: 100vh;
     margin: 0;
 }
+
+.card {
+    position: relative;
+    width: 600px;
+    top: -350px;
+    left: 650px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 15px;
+}
+
+.identity-info {
+    position: absolute;
+    color: black;
+    font-size: 16px;
+}
+
+.name {
+    top: 118px;
+    left: 348px;
+}
+
+.surname {
+    top: 171px;
+    left: 370px;
+}
+
+.dob {
+    top: 222px;
+    left: 347px;
+}
+
+.nationality {
+    top: 276px;
+    left: 392px;
+}
